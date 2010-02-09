@@ -1,0 +1,169 @@
+
+body
+{
+    background: #fff;
+    margin: 0px;
+    line-height: 1.75em;
+}
+
+
+pre
+{
+    margin: 1ex;
+    padding: 1ex;
+    background: #DDD;
+    border: solid black 1px;
+    border-color: #999 #EEE #EEE #999;
+    line-height: 110%;
+
+    border-radius: 1ex;
+    -moz-border-radius: 1ex;
+    -webkit-border-radius: 1ex;
+    -opera-border-radius: 1ex;
+}
+
+h1
+{
+}
+
+h2
+{
+    background: #333;
+    color: #fff;
+    padding: 2px 1em;
+    margin: 2em 0px 0px 0px;
+}
+
+h3
+{
+    border: solid black 1px;
+    border-width: 1px 0px 0px 5px;
+    padding: 2px 8px;
+    margin: 2em 0px 0px 0px;
+}
+
+h4
+{
+    border-left: solid #c33 5px;
+    font-size: 1em;
+    padding-left: 8px;
+    line-height: 105%;
+    margin: 2em 0px 0px 0px;
+
+    border-radius: 1ex;
+    -moz-border-radius: 1ex;
+    -webkit-border-radius: 1ex;
+    -opera-border-radius: 1ex;
+}
+
+h5
+{
+    display: table;
+    line-height: 105%;
+    background: #366;
+    color: #fff;
+    min-width: 1em;
+    max-width: 100%;
+    padding: 2px 1em;
+    margin: 2em 0px 0px 0px;
+}
+
+p
+{
+    margin: 0px 1ex;
+}
+
+
+#header
+{
+   padding: 54px 32px 8px 32px;
+   border-bottom: solid #C96 3px;
+}
+
+
+#content
+{
+   margin: 0px 32px;
+}
+
+#abstract
+{
+  margin: 2em;
+  font-style: italic;
+}
+
+#table-of-contents h2
+{
+  background: transparent;
+  color: #000;
+  font-size: 1.5em;
+}
+
+#table-of-contents
+{
+   font-size: 80%;
+   line-height: 125%;
+}
+
+.back-to-toc
+{
+    text-align: right;
+    font-size: 0.7em;
+    line-height: 105%;
+    margin-: 0px;
+}
+
+
+
+
+.figure
+{
+  margin: 2em 0px;
+}
+
+.figure-caption
+{
+  text-align:center;
+}
+
+code
+{
+  background-color: #DDD;
+}
+
+#footer
+{
+  text-align: right;
+  border-top: solid black 1px;
+  padding: 1em 32px 300px 32px;
+}
+
+
+.note
+{
+    font-size: 80%;
+  border: dashed #c33 1px;
+  margin: 2em 0px 2em 20%;
+  padding: 1ex;
+
+  border-radius: 1ex;
+  -moz-border-radius: 1ex;
+  -webkit-border-radius: 1ex;
+  -opera-border-radius: 1ex;
+}
+
+.note-header
+{
+  line-height: 110%;
+  position: relative;
+  top: -1em;
+  background: #c33;
+  color: white;
+  text-align: center;
+  width: 5em;
+
+  border-radius: 0.5em;
+  -moz-border-radius: 0.5em;
+  -webkit-border-radius: 0.5em;
+  -opera-border-radius: 0.5em;
+}

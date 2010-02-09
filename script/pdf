@@ -1,0 +1,12 @@
+#! /bin/sh
+
+perl -Ilib script/pan doc/index.pan \
+     -MText::PAN::Suite::Filter::MacroExpand \
+     -MText::PAN::Suite::Filter::URL2Ref \
+     -MText::PAN::Suite::Filter::TeXEscape \
+     -s xslt/latex.xslt \
+	| nkf -We > index.ltx
+platex index.ltx
+platex index.ltx
+dvipdfmx index.dvi
+

@@ -1,0 +1,32 @@
+---
+abstract: 'Converts PAN(Pretty Article Notation) to XML Document.'
+author:
+  - 'lieutar <lieutar@1dk.jp>'
+build_requires:
+  ExtUtils::MakeMaker: 6.42
+  Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
+distribution_type: module
+generated_by: 'Module::Install version 0.91'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Text-PAN
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  Any::Moose: 0.10
+  HTML::Entities: 0
+  Parse::Yapp::Driver: 0
+  Path::Class: 0
+  Text::OutputFilter: 0
+  URI::Escape: 0
+  XML::LibXML: 0
+  XML::LibXSLT: 0
+resources:
+  license: http://dev.perl.org/licenses/
+version: "'0.0.3'"

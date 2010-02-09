@@ -1,0 +1,195 @@
+%{
+
+use strict;
+use warnings;
+use Text::PAN::Parser::Methods;
+use Data::Dumper;
+
+{
+  my $id = 0;
+  sub __id{
+    "sect-".($id++);
+  }
+}
+
+
+%}
+%%
+document:
+          doc
+        | blank doc              { $_[2] }
+        ;
+
+
+doc:
+          blockelements               { $_[0]->addchildren($_[0]->root, $_[1]) }
+        ;
+
+
+
+####
+# blockelement +
+#
+blockelements:
+                { [] }
+        | blockelements blockelement { push @{$_[1]}, $_[2]; $_[1] }
+        ;
+
+
+
+####
+#
+blockelement:
+          para
+        | verb
+        | spe_verb
+        | ol
+        | ul
+        | dl
+        | section
+        | hr
+        | block_elem
+        ;
+
+block_elem:
+           BLOCK_ELEM
+         | verb
+         | spe_verb
+         | block_elem blank {$_[1]}
+         ;
+
+
+
+
+
+###
+
+hr:     HR {$_[0]->genelem('hr')}
+  |     hr bl {$_[1]}
+  ;
+
+####
+#
+section:
+          SECTION_IN sectionheader blank  blockelements SECTION_OUT{
+            $_[0]->genelem(section => [$_[2], @{$_[4]}], { id => __id() })
+            }
+        | SECTION_IN sectionheader blank  blockelements {
+            $_[0]->genelem(section => [$_[2], @{$_[4]}], { id => __id() })
+        }
+        ;
+
+sectionheader:
+          SECTION_HEADER inlinenodes BR {
+              $_[0]->genelem(head => $_[2]);
+          }
+        ;
+
+
+
+####
+
+ul:
+        ulbody DEDENT { $_[0]->genelem( ul => $_[1] )};
+
+ulbody:
+        INDENT ulitem { [$_[2]] }
+        | ulbody ulitem { push @{$_[1]}, $_[2]; $_[1]; }
+        ;
+
+ulitem:
+        ULBULLET blockelements {  $_[0]->genelem(item => $_[2] ) }
+        ;
+
+####
+
+ol:      olbody DEDENT { $_[0]->genelem( ol => $_[1] )};
+olbody:
+        INDENT olitem { [$_[2]] }
+        | olbody olitem { push @{$_[1]}, $_[2]; $_[1]; }
+        ;
+olitem:  OLBULLET blockelements {  $_[0]->genelem(item => $_[2] ) }
+        ;
+
+####
+
+dl:     dlbody DEDENT { $_[0]->genelem( dl => $_[1] ) } ;
+
+dlbody:
+          INDENT dlitem { [$_[2]] }
+        | dlbody dlitem { push @{$_[1]}, $_[2]; $_[1]; }
+        ;
+
+dlitem: DTSTART inlinenodes DTEND blockelements
+                { $_[0]->genelem(item => [$_[0]->genelem(about => $_[2]),
+                                          @{$_[4]}]) }
+        ;
+
+
+####
+
+spe_verb:
+          SPE_VERB {$_[0]->genelem(verb => [$_[1]->{data}], $_[1]->{attrs})}
+        ;
+
+
+
+verb:
+          VERB  {$_[0]->genelem(verb => [$_[1]])}
+        ;
+
+
+
+####
+
+para:
+          inlinenodes          { $_[0]->genelem(p => $_[1]) }
+        | inlinenodes bl       { $_[0]->genelem(p => $_[1]) }
+        ;
+
+####
+
+inlinenodes:
+          inlinenode             { [$_[1]] }
+        | inlinenodes inlinenode { push @{$_[1]}, $_[2]; $_[1] }
+        | inlinenodes COMMENT_DECL { $_[1] }
+        ;
+
+inlinenode:
+          text
+        | ELEM
+        | ref
+        ;
+
+
+####
+
+text:
+          TEXT
+        | text TEXT  { $_[1] . $_[2] }
+        ;
+
+
+####
+
+blank:
+        | bl
+        | blank COMMENT_DECL
+        ;
+
+bl:
+          BL
+        | BL bl
+        ;
+
+###
+ref:
+          REFSTART inlinenodes REFEND {$_[0]->genelem(ref => $_[2] , {name => $_[0]->value_of($_[2])})}
+        ;
+
+
+
+
+
+%%
+

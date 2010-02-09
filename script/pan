@@ -1,0 +1,114 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Path::Class;
+use Text::PAN::CONSTANTS qw(NS);
+use Text::PAN::Suite;
+use Text::PAN::Suite::Filter::XSLT::File;
+use Pod::Usage;
+use UNIVERSAL::require;
+
+my $pan    = Text::PAN::Suite->new;
+my $input  = undef;
+my $output = undef;
+my %def     = ();
+
+while(@ARGV){
+  local $_ = shift @ARGV;
+
+  scalar(/\A-(?:-?xslt|s)(?:=(.+))?/) and do{
+    my $name = $1;
+    my $val  = $2 || shift;
+    my $m = Text::PAN::Suite::Filter::XSLT::File->new
+      (file      => $val,
+       functions => [[NS, 'value-of', sub{my $f = shift; $def{$f}}]]);
+    $pan->add_filter($m);
+    next;
+  };
+
+  scalar(/\A-D([^=]+)(?:=(.*))?/) and do{
+    my $name = $1;
+    my $val  = $2 || shift;
+    $def{$name} = $val;
+    next;
+  };
+
+  scalar(/\A-F([^=]+)(?:=(.*))?/) and do{
+    my $name = $1;
+    my $file = $2 || shift;
+    $def{$name} = join "", file($file)->slurp;
+    next;
+  };
+
+  scalar(/\A-M(.+)/) and do{
+    my $m=$1 || shift @ARGV;
+    $m->require or die;
+    $pan->add_filter($m->new);
+    next;
+  };
+
+  scalar(/\A-I(.*)/) and do{
+    my $p=$1 || shift @ARGV;
+    lib->import($p);
+    next;
+  };
+
+  scalar(/\A-(?:-?output|o)(?:=(.*))?/) and do{
+    $output = $1 || shift;
+    next;
+  };
+
+  /\A-(?:h|-help|-usage)/ and pod2usage(0);
+
+  /\A-/ and do{
+    print STDERR "unknown option: $_\n";
+    pod2usage(1);
+  };
+
+  $input and do{
+    pod2usage(1);
+  };
+
+  $input = $_;
+}
+
+unless( defined $input ){
+  print STDERR "input file is not supplied.\n";
+  pod2usage(1);
+}
+
+my $result = $pan->run($input, as_text => 1);
+
+if($output){
+  my $fh = file($output)->openw;
+  die "Could not open file: $output " unless $fh;
+  print $fh $result;
+  $fh->close;
+}
+else{
+  print $result;
+}
+
+1;
+__END__
+
+
+=head1 NAME
+
+pan - transrates Text::PAN document to other format.
+
+=head1 SYNOPSIS
+
+pan [OPTIONS] <input-file>
+
+  OPTIONS:
+
+   -M           specifies the filter by module name.
+   -X --xslt    specifies the filter by xslt file.
+   -Dxxx=yyy    specifies the value of the constant.
+   -Fxxx=yyy    specifies the value of the constant by the file containts.
+   -I           adds to include path.
+   -o --output  specifies the output filename.
+
+=cut
+
