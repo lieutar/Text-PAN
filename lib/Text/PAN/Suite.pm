@@ -47,10 +47,11 @@ sub run{
   foreach my $filter (@filters){
     $doc = $filter->do_filter($doc);
   }
+
   if($last){
     return $last->do_filter($doc, as_string => 1, %opt);
   }
-  elsif($opt{as_text}){
+  elsif($opt{as_string}){
     return $doc->toString;
   }
   $doc;

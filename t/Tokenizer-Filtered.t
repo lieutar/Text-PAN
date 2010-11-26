@@ -5,7 +5,7 @@ use File::Basename;
 use lib dirname(__FILE__)."/..";
 use t::lib::Tokenizer::TestLib qw(:all);
 BEGIN{
-  plan tests => 7;
+  plan tests => 8;
   use_ok $_ foreach qw(
                         Text::PAN::Tokenizer::Base
                         Text::PAN::Tokenizer::Filtered
@@ -80,4 +80,12 @@ testt qw( SECTION_IN SECTION_HEADER TEXT BR
 </yyy>
 </>
 </xxx>
+EOF
+
+
+testt qw(BLOCK_COMMENT TEXT),<<'EOF';
+<!--
+aaaa
+-->
+aaa
 EOF

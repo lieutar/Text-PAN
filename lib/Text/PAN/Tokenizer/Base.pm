@@ -236,7 +236,6 @@ sub _next_token {
     return $this->next_token;
   }
 
-
   my $state = $this->state;
   $state eq 'HEADER' and do{
     $line =~ /\A\s*\Z/ and return $this->next_token;
@@ -309,6 +308,7 @@ sub _next_token {
     $line =~ s/\A>// and do{
       $in->unget_line($line);
       $this->pop_state;
+#warn ">:".$in->line;
       return [
               '>'         => '>',
               src         => '>',
@@ -394,6 +394,15 @@ sub _next_token {
     };
 
     ## TAG_START ( begining_of_line => 1 )
+    $line =~ s/\A((?:<(?=<))+)// and do{
+      $in->unget_line($line);
+      push @$buf, [
+                   TEXT => $1,
+                   src  => $1,
+                   line => $in->line
+                  ];
+      return $this->next_token;
+    };
     $line =~ s{\A(\s*)<(?![!/])((?:$RE_QNAME)?)}{} and do{
       $in->unget_line($line);
       my $ind_width = length $1;
@@ -408,6 +417,22 @@ sub _next_token {
       $this->push_state('IN_TAG');
       return $this->next_token;
     };
+
+    $line =~ s/\A(<!--)// and do{
+      $this->in->unget_line($line);
+      $this->push_state('IN_TAG');
+      $this->push_state('IN_COMMENT');
+      return [
+              BEGIN_COMMENT_DECL => '<!--',
+              src                => '<!--',
+              line               => $in->line,
+              begining_of_line   => 1,
+             ];
+    };
+
+
+
+
 
     ## HR
     $line =~ s/\A(\s*)(--+)(?:\x0d\x0a|[\x0d\x0a]|\Z)// and do{
@@ -606,6 +631,15 @@ sub read_line{
             BEGIN_COMMENT_DECL => '<!--',
             src                => '<!--',
             line               => $in->line
+           ];
+  };
+
+  $line =~ s/\A((?:<(?=<))+)// and do{
+    $this->in->unget_line($line);
+    return [
+            TEXT => $1,
+            src  => $1,
+            line => $in->line,
            ];
   };
 

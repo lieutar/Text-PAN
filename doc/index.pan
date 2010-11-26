@@ -1,7 +1,7 @@
 
 = Text::PAN - Pretty Article Notation
 
-<ref name=Text::PAN /Text::PAN>
+<def name=Text::PAN /Text::PAN>
 <def name=RD        /<dfn/<ref url="http://rubyforge.org/projects/rdtool/" /RD>>>
 <def name=tDiary    /<dfn/<ref url="http://www.tdiary.org/" /tDiary>>>
 <def name=Ruby      /<dfn/<ref url="http://www.ruby-lang.org" /Ruby>>>
@@ -131,6 +131,7 @@ Text::PAN では、この制約をとりはらい、
 のように、NET式の要素の表記を入れ子にすることも可能です。
 
 
+
 *** 空タグ
 
 Text::PAN では、SGML の空タグに似た機構も取り入れています。空タグとは、
@@ -173,7 +174,7 @@ Text::PAN は、NET形式の開始タグではなく、終了タグと解釈し�
 *** 引用符の省略
 
 Text::PAN における、引用符の省略は、殆どのSGML文書より協力で、<code/&nbsp;>
-<code/=><code/&gt;><code//><code/&lt:> 等の文字を含まないあらゆる連続
+<code/=><code/&gt;><code//><code/&lt;> 等の文字を含まないあらゆる連続
 する文字列で可能です。
 
 
@@ -352,32 +353,6 @@ outline-mode のデフォルトの設定と互換性をもったフォーマッ�
 
  - リスト1
    リスト1の続き
-
-   リスト1の2段落目
-
-   --------------
-
-   リスト1の罫線のあと
-
-     リスト1の verbatim
-
- - リスト2
-   - リスト2.1
-   - リスト2.2
-||<
-
-のように、インデントにより入れ子を表現する事ができ、HTML等と同じく、
-番号なしリスト、番号つきリスト、定義リストに対応しています。
-これらは、
-
->|xml|
-  <ul>
-    <item><p>リスト1
-リスト1の続き</p><p></p>リスト1の2段落目</item>
-    <item><p>リスト2
-</p>
-         <hr />
-         <p>リスト1の罫線のあと</p>
          <verb>リスト1の verbatim
 </verb>
          <ul>
@@ -450,6 +425,7 @@ Text::PAN::Suite は、Text::PAN をより扱いやすくするためのモジ�
 その他 DOM 操作にて XML 形式に変換された文書をさらに加工するための仕組みを提供します。
 
 ** フィルタロール
+
 *** Text::PAN::Suite::Role::Filter
 *** Text::PAN::Suite::Role::Filter::XSLT
 *** Text::PAN::Suite::Role::Filter::XSLT::File
@@ -483,7 +459,19 @@ XSLTテンプレートと組みあわせることで、以下のようにマク�
 Text::PAN には、現在通常の XML 文書にはあるいくつかの機能が実装されていません。
 全てが実現できるかどうかはわかりませんが、必要に応じ、実装して行きたいと考えています。
 
+** 多言語ドキュメント
 
+現時点の Text::PAN には、多言語ドキュメントの機能をサポートしていません。
+適当な XML ブロックを作って xml:lang 属性をつけることはできますが、section 要素などに
+それらの属性を付加することができません。
+
+** Entity Notation
+
+現時点の Text::PAN には、実態宣言の機能をサポートしていません。
+
+** Prosessing instruction
+
+現時点の Text::PAN には、Prosessing instruction をサポートしていません。
 
 ** CDATA セクション
 

@@ -161,6 +161,7 @@ sub end_tag_rest{
 
 sub illegal_token{
   my ($this, $tok) = @_;
+#warn join " ", "ILL:", @$tok[0,1];
   my %TV = (
             "SPACES" => " ",
 	    'BR'     => "\n",
@@ -222,6 +223,11 @@ sub parse_element{
       ($tt, $tv, %misc) = @$tok;
     };
 
+    ($tt eq 'BEGIN_COMMENT_DECL') and do{
+      $tok = $this->parse_comment_decl($tok);
+      ($tt, $tv, %misc) = @$tok;
+    };
+
     ($tt eq '>') and do{
       (undef, my $tag_type) = $this->current_tag;
       if($tag_type eq 'net'){
@@ -229,7 +235,7 @@ sub parse_element{
       }
       else{
         $tt = 'TEXT';
-        $tv = '/';
+        $tv = '>';
       }
       $tok = [$tt, $tv, %misc];
     };
@@ -366,9 +372,8 @@ sub complete_open_tag{
     ($tt eq '=') and do{
       ($state eq '=') and do{
 	$state = 'VALUE';
-	next;
       };
-      goto ERROR;
+      next;
     };
 
     ($tt eq 'TEXT') and do{
@@ -381,12 +386,19 @@ sub complete_open_tag{
 
       ($state eq 'VALUE') and do{
 	$state = 'NORMAL';
-        goto ERROR unless(eval{
+        eval{
           $elem->setAttribute($attr, $t->[1]);
-          1;
-        });
+        };
 	undef $attr;
 	next;
+      };
+
+      ($state eq '=') and do{
+        eval{
+          $elem->setAttribute($attr, $attr);
+        };
+        $attr = $t->[1];;
+        next;
       };
 
       ($state eq 'COMMENT') and do{
@@ -429,6 +441,7 @@ sub complete_open_tag{
     };
   }
 
+  eval{ $elem->setAttribute($attr, $attr) } if $attr;
   return [
           OPEN_ELEM => $elem,
           tag_type  => $type,
@@ -438,6 +451,7 @@ sub complete_open_tag{
 
 
  ERROR:
+  eval{ $elem->setAttribute($attr, $attr) } if $attr;
   $base->unget_token($t);
   [
    OPEN_ELEM => $elem,
@@ -452,6 +466,10 @@ sub complete_open_tag{
 
 sub parse_comment_decl{
   my ($this, $tok) = @_;
+
+  (undef,undef,my %opt)=@$tok;
+  my %last_opt;
+  my $src      = $opt{src};
   my $state    = 'COMMENT';
   my $comm     = $this->element_builder->gencomm('');
   my $base = $this->base;
@@ -459,8 +477,10 @@ sub parse_comment_decl{
 
   for(;;){
     my $tok = $base->next_token;
+
     goto ERROR unless defined $tok;
-    my $tt  = $tok->[0];
+    (my $tt, undef, %last_opt)   = @$tok;
+    $src .= $last_opt{src} || '';
 
     $tt eq 'END_COMMENT' and do{
       $state eq 'COMMENT'and do{
@@ -499,7 +519,15 @@ sub parse_comment_decl{
   }
 
  ERROR:
-  [COMMENT_DECL => $comm]
+  [
+   ($opt{begining_of_line} &&
+    $last_opt{end_of_line}
+    ? 'BLOCK_COMMENT'
+    : 'INLINE_COMMENT') => $comm,
+   %opt,
+   end_of_line => $last_opt{end_of_line},
+   src => $src
+  ]
 }
 
 

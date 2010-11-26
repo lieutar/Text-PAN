@@ -18,7 +18,8 @@ sub _msg {
 
 sub commentp {
   my $struct = shift;
-  isa($struct, 'ARRAY') && $struct->[0] eq '#';
+  return 0 unless isa($struct, 'ARRAY');
+  $struct->[0] eq '#';
 }
 
 sub elemp {
@@ -60,7 +61,7 @@ sub checkTree {
 
     while( my($attr, $value) = each %attrs ){
       next if ($node->getAttribute($attr)||'') eq ($value || '');
-      _msg "$attr: ".($node->getAttribute($attr)||'') ." ne  ". ($value || '');
+      _msg "$attr: ".($node->getAttribute($attr)||'') ." ne ". ($value || '');
       return 0;
     }
 

@@ -7,7 +7,7 @@ use File::Basename;
 use lib dirname(__FILE__)."/..";
 use t::lib::Parser::TestLib;
 
-plan tests => 100 + 28;
+plan tests => 100 + 42;
 
 test
   [article => [] ],
@@ -44,6 +44,7 @@ EOF
 test
   [article=>
    [
+
     [p =>
      [
       "aaa",
@@ -162,7 +163,6 @@ test
       "dddd\n"
      ]],
    ]], << 'EOF' , 'two paragraph';
-
 aaaa
 bbbb
 
@@ -289,6 +289,36 @@ test
    [
     [p =>
      [
+      "aaaa\n".
+      "bbbb\n"
+     ]],
+    [verb => (type => "xml"),
+     [
+      "<abc><def /></abc>\n",
+     ]],
+    [p =>
+     [
+      "cccc\n".
+      "dddd\n"
+     ]],
+   ]], << 'EOF' , 'verb and bl.';
+aaaa
+bbbb
+
+>|xml|
+  <abc><def /></abc>
+||<
+
+cccc
+dddd
+EOF
+
+
+test
+  [article =>
+   [
+    [p =>
+     [
       "aaa\n",
      ]],
     [note =>
@@ -365,6 +395,18 @@ test
 aaa[[x<em/<code/y>>z]]bbb
 EOF
 
+test
+  [article =>
+   [
+    [p =>
+     [[ref => ["a"]],
+      " ",
+      [ref => ["b"]],
+     ]]
+   ]], <<'EOF', 'ref spaces ref';
+[[a]] [[b]]
+EOF
+
 
 ## special notations
 test
@@ -377,6 +419,24 @@ test
    ]], <<'EOF', 'empty special verb';
 >|perl|
 ||<
+EOF
+
+test
+  [article =>
+   [
+    [dl =>
+     [
+      [item =>
+       [
+        [about =>
+         [
+          "xxx"
+         ]]
+       ]],
+     ]],
+   ]], <<'EOF','empty dd and bl';
+::xxx::
+
 EOF
 
 
@@ -660,6 +720,7 @@ p2p2
 
 EOF
 
+## 30
 test
   [article =>
    [
@@ -854,6 +915,195 @@ use warnings;
 ||<
 EOF
 
+test [article =>
+      [
+       [table =>
+        [
+         [tr =>
+          [
+           [td =>
+            [
+             ['#' => ' aaa '],
+             "aaa\nbbb\nccc\n",
+            ]]
+          ]]
+        ]]
+      ]],<<'EOF', 'comments in elements.';
+<table>
+<tr>
+<td><!-- aaa -->
+aaa
+bbb
+ccc
+</td>
+</tr>
+</table>
+EOF
+
+###
+test [article =>
+      [
+       [note =>
+        []]
+      ]], <<'EOF', 'BL in elements (0)';
+<note>
+
+
+
+</note>
+EOF
+test [article =>
+      [
+       [note =>
+        [
+         [p => ["aaaa\n"]],
+         [p => ["bbbb\n"]],
+        ]]
+      ]], <<'EOF', 'BL in elements (1)';
+<note>
+
+aaaa
+
+bbbb
+
+</note>
+EOF
+
+test [article =>
+      [
+       [note =>
+        [
+         ['#' => 'xxx'],
+        ]],
+      ]], <<'EOF', 'BL in elements (2/with comment).';
+<note>
+
+<!--xxx-->
+
+</note>
+EOF
+
+test [article =>
+      [
+       [a =>
+        [
+         [b => 
+          [
+           [c => []],
+           [c =>
+            [
+             ['#' => 'xxx']
+            ]],
+          ]]
+        ]]
+      ]], <<'EOF', 'BL in elements (3/with comment).';
+<a><b><c></c><c><!--xxx-->
+
+</c></b></a>
+EOF
+
+
+
+test [article =>
+      [
+       [p =>
+        [
+         [hoo => (qw(aaa aaa bbb bbb ccc ccc ddd dvv eee eee)), 
+          [
+          ]]
+        ]]
+      ]], <<'EOF' , 'incomplete elem...0';
+<hoo aaa bbb ccc ddd=dvv eee === =
+EOF
+
+
+test [article =>
+      [
+       [p =>
+        [
+         "<&"
+        ]]
+      ]], <<'EOF' , 'incomplete elem...1';
+<&
+EOF
+
+
+test [article =>
+      [
+       [p =>
+        [
+         '<<',
+         [aaa =>
+          [
+           '>>',
+          ]],
+        ]]
+      ]], <<'EOF', '<< <elem> >>';
+<<<aaa>>>
+EOF
+
+
+test [article =>
+       [
+        [ul =>
+         [
+          [item =>
+           [
+            [p =>
+             [
+              [ref => name => 'aaa' , ['aaa']],
+              ' / ',
+              [ref => name => 'bbb' , ['bbb']],
+              ' / ',
+              [ref => name => 'ccc' , ['ccc']],
+             ]],#p
+
+            [ul =>
+             [
+              [item =>
+               [
+                [p =>
+                 [
+                  [ref => name => 'aaa' , ['aaa']],
+                  ' / ',
+                  [ref => name => 'bbb' , ['bbb']],
+                  ' / ',
+                  [ref => name => 'ccc' , ['ccc']],
+                 ]],
+               ]],
+             ]], # ul
+           ]], # item
+         ]], # ul
+       ]], # article
+  <<'EOF', 'ul and reference.';
+- [[aaa]] / [[bbb]] / [[ccc]]
+  - [[aaa]] / [[bbb]] / [[ccc]]
+EOF
+
+
+
+test [article =>
+      [
+       ['#' => "== comm =="],
+       [p => [ "ddd\n"]],
+      ]], << 'EOF', 'comment and paragraph';
+<!--== comm ==-->
+
+
+ddd
+
+
+EOF
+
+test [article =>
+      [
+       [p   => ["aaa\n"]],
+       ['#' => ' xxx '],
+      ]], <<'EOF','end with comment decl';
+aaa
+
+<!-- xxx -->
+EOF
 
 
 
@@ -866,7 +1116,8 @@ SKIP:
   use t::lib::Random;
   use Path::Class;
 
-  my $jar = file(file(__FILE__)->parent->parent, basename(__FILE__).'.random.txt')->absolute;
+  my $jar = file(file(__FILE__)->parent->parent,
+                 basename(__FILE__).'.random.txt')->absolute;
 
   diag "Tests by random text";
   my $random = ' ' x 32768;

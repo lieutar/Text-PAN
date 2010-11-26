@@ -11,7 +11,7 @@ This document describes Text::PAN version 0.0.1
 
 =cut
 
-our $VERSION = q('0.0.3');
+our $VERSION = q(0.0.9);
 
 
 

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 124;
+use Test::More tests => 100 + 25;
 use File::Basename;
 use lib dirname(__FILE__)."/..";
 use t::lib::Tokenizer::TestLib qw(:all);
@@ -282,6 +282,24 @@ alert(456);
 >
 </html>
 EOF
+
+testt qw(
+          TAG_START > TAG_START > TAG_START > BEGIN_COMMENT_DECL TEXT
+          TEXT END_COMMENT >
+          TEXT
+          ENDTAG_START > ENDTAG_START > ENDTAG_START >
+       ), << 'EOF';
+<table>
+<tr>
+<td><!-- aaaa
+bbbb <> ccccc ddd -->
+aaaa
+</td>
+</tr>
+</table>
+EOF
+
+
 
 SKIP:
 {
