@@ -55,3 +55,4 @@ t/Tokenizer-Base.t
 t/Tokenizer-Filtered.t
 xslt/html4.xslt
 xslt/latex.xslt
+pan-mode.el
